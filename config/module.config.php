@@ -2,12 +2,7 @@
 return [
     'controllers' => [
         'invokables' => [
-            'ShowMore\Controller\SiteAdmin\Index' => ShowMore\Controller\SiteAdmin\IndexController::class,
-        ],
-    ],
-    'view_manager' => [
-        'template_path_stack' => [
-            dirname(__DIR__) . '/view',
+            'ShowMore\Controller\SiteAdmin\Index' => 'ShowMore\Controller\SiteAdmin\IndexController',
         ],
     ],
     'navigation' => [
@@ -31,15 +26,12 @@ return [
                             'slug' => [
                                 'child_routes' => [
                                     'show-more' => [
-                                        'type' => \Laminas\Router\Http\Segment::class,
+                                        'type' => 'Literal',
                                         'options' => [
-                                            'route' => '/show-more[/:action]',
-                                            'constraints' => [
-                                                'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
-                                            ],
+                                            'route' => '/show-more',
                                             'defaults' => [
                                                 '__NAMESPACE__' => 'ShowMore\Controller\SiteAdmin',
-                                                'controller' => 'index',
+                                                'controller' => 'Index',
                                                 'action' => 'index',
                                             ],
                                         ],
@@ -50,6 +42,16 @@ return [
                     ],
                 ],
             ],
+        ],
+    ],
+    'view_manager' => [
+        'template_path_stack' => [
+            dirname(__DIR__) . '/view',
+        ],
+    ],
+    'view_helpers' => [
+        'invokables' => [
+            'showMore' => 'ShowMore\View\Helper\ShowMore',
         ],
     ],
 ];
