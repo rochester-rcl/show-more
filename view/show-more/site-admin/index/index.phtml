@@ -1,0 +1,51 @@
+<?php
+$this->htmlElement('body')->appendAttribute('class', 'show-more site-admin index');
+$this->pageTitle($this->translate('Show More Settings'));
+?>
+
+<div id="page-actions">
+    <?php echo $this->hyperlink($this->translate('Back to site admin'),
+        $this->url('admin/site', [], true), ['class' => 'button']); ?>
+</div>
+
+<form method="post">
+    <fieldset>
+        <legend><?php echo $this->translate('Show More Configuration'); ?></legend>
+
+        <div class="field">
+            <div class="field-meta">
+                <label for="show_more_mode"><?php echo $this->translate('Truncation Mode'); ?></label>
+            </div>
+            <div class="inputs">
+                <label>
+                    <input type="radio" name="show_more_mode" value="words"
+                        <?php echo $settings['show_more_mode'] === 'words' ? 'checked' : ''; ?>>
+                    <?php echo $this->translate('Words'); ?>
+                </label>
+                <label>
+                    <input type="radio" name="show_more_mode" value="characters"
+                        <?php echo $settings['show_more_mode'] === 'characters' ? 'checked' : ''; ?>>
+                    <?php echo $this->translate('Characters'); ?>
+                </label>
+            </div>
+        </div>
+
+        <div class="field">
+            <div class="field-meta">
+                <label for="show_more_limit"><?php echo $this->translate('Limit'); ?></label>
+                <div class="field-description">
+                    <?php echo $this->translate('Number of words or characters before showing "Show more" button'); ?>
+                </div>
+            </div>
+            <div class="inputs">
+                <input type="number" name="show_more_limit" id="show_more_limit"
+                       value="<?php echo $this->escapeHtml($settings['show_more_limit']); ?>"
+                       min="1" max="1000" required>
+            </div>
+        </div>
+    </fieldset>
+
+    <div class="field">
+        <input type="submit" value="<?php echo $this->escapeHtml($this->translate('Save')); ?>" class="button">
+    </div>
+</form>
