@@ -1,0 +1,63 @@
+/**
+ * ShowMore Module CSS
+ * Styles for show more/less functionality
+ */
+
+.show-more-content {
+    position: relative;
+}
+
+.show-more-btn {
+    background: none;
+    border: none;
+    color: #0073aa;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+    margin-left: 5px;
+    font-size: inherit;
+    font-family: inherit;
+    display: inline;
+}
+
+.show-more-btn:hover {
+    color: #005a87;
+}
+
+.show-more-btn:focus {
+    outline: 1px dotted #0073aa;
+    outline-offset: 2px;
+}
+
+.show-more-content .content-text {
+    display: inline;
+}
+
+.show-more-content.expanded .content-text {
+    display: inline;
+}
+
+/* Specific styling for metadata properties */
+.show-more-metadata {
+    line-height: 1.5;
+}
+
+.property .show-more-content {
+    margin-bottom: 0.5em;
+}
+
+/* Property-specific styling */
+.property-dcterms-description .show-more-btn,
+.property-dcterms-abstract .show-more-btn {
+    font-weight: normal;
+    font-style: italic;
+}
+
+/* Ensure proper spacing in metadata context */
+.metadata .property .value .show-more-content {
+    display: block;
+}
+
+.metadata .property .value .show-more-content .content-text {
+    display: inline;
+}

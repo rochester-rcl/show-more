@@ -25,7 +25,7 @@ class IndexController extends AbstractActionController
         // Get current settings
         $settings = [
             'show_more_mode' => $siteSettings->get('show_more_mode', 'words'),
-            'show_more_limit' => $siteSettings->get('show_more_limit', 50),
+            'show_more_limit' => $siteSettings->get('show_more_limit', 0),
         ];
 
         $view = new ViewModel([

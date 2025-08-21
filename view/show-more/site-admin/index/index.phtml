@@ -34,13 +34,13 @@ $this->pageTitle($this->translate('Show More Settings'));
             <div class="field-meta">
                 <label for="show_more_limit"><?php echo $this->translate('Limit'); ?></label>
                 <div class="field-description">
-                    <?php echo $this->translate('Number of words or characters before showing "Show more" button'); ?>
+                    <?php echo $this->translate('Number of words or characters before showing "Show more" button, select 0 to disable for this site.'); ?>
                 </div>
             </div>
             <div class="inputs">
                 <input type="number" name="show_more_limit" id="show_more_limit"
                        value="<?php echo $this->escapeHtml($settings['show_more_limit']); ?>"
-                       min="1" max="1000" required>
+                       min="0" max="10000" required>
             </div>
         </div>
     </fieldset>
