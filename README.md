@@ -12,7 +12,7 @@ The styling of the "Show more" button can be adusted by altering the CSS file at
 Unzip a release of this module in your modules folder. Ensure the folder is named "ShowMore". Go into the Omeka S admin interface and hit install. From there, you will have to configure folding on each site that you want it enabled on.
 
 ## TODO
-- [ ] Add an "Excluded Properties" dropdown to exclude certain properties from folding.
+- [x] Add an "Excluded Properties" dropdown to exclude certain properties from folding.
 
 ## Support
 This module is supported through Github. Should you encounter a bug, or to request an enhancement, please open an issue on this repository. I will address them as I am able.
