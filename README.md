@@ -6,7 +6,7 @@ Normally when Omeka S displays a metadata field, the entire contents is displaye
 
 ## Customization
 
-The styling of the "Show more" button can be adusted by altering the CSS file at /show-more/assets/css/show-more.css
+The styling of the "Show more" button can be adusted by altering the CSS file at /ShowMore/assets/css/show-more.css
 
 ## Installation
 Unzip a release of this module in your modules folder. Ensure the folder is named "ShowMore". Go into the Omeka S admin interface and hit install. From there, you will have to configure folding on each site that you want it enabled on.
