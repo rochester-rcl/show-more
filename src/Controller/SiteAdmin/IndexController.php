@@ -16,7 +16,7 @@ class IndexController extends AbstractActionController
 
             // Save settings
             $siteSettings->set('show_more_mode', $data['show_more_mode'] ?? 'words');
-            $siteSettings->set('show_more_limit', (int)($data['show_more_limit'] ?? 50));
+            $siteSettings->set('show_more_limit', (int)($data['show_more_limit'] ?? 0));
 
             $this->messenger()->addSuccess('Show More settings saved.');
             return $this->redirect()->toRoute('admin/site/slug/show-more', [], true);
