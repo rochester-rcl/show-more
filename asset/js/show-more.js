@@ -36,8 +36,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         function isPropertyExcluded(propertyLabel) {
             return excludedProperties.some(function (term) {
-                return propertyLabel.toLowerCase().includes(term.split(':')[1]);
-            });
+// Extract the local part of the term and compare with label
+                var localPart = term.split(':')[1];
+                // Handle camelCase to spaced words (e.g., accessRights -> access rights)
+                var spacedLabel = localPart.replace(/([A-Z])/g, ' $1').toLowerCase().trim();
+                return propertyLabel.toLowerCase() === spacedLabel ||
+                    propertyLabel.toLowerCase().includes(localPart.toLowerCase());            });
         }
 
         // Function to count words
