@@ -1,6 +1,89 @@
 document.addEventListener("DOMContentLoaded", function () {
     console.log("ShowMore: DOM loaded, starting processing");
 
+    function truncateHTML(html, maxLength, mode) {
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        var fullText = tempDiv.textContent || tempDiv.innerText;
+
+        // If content is already short enough, return as-is
+        var actualLength = mode === 'words' ? countWords(fullText) : fullText.length;
+        if (actualLength <= maxLength) {
+            return html;
+        }
+
+        var targetLength;
+        if (mode === 'words') {
+            var words = fullText.trim().split(/\s+/);
+            targetLength = words.slice(0, maxLength).join(' ').length;
+        } else {
+            targetLength = maxLength;
+        }
+
+        // Walk through the DOM and build truncated HTML
+        var result = '';
+        var currentLength = 0;
+
+        function walkNode(node) {
+            if (currentLength >= targetLength) {
+                return false; // Stop processing
+            }
+
+            if (node.nodeType === 3) { // TEXT_NODE
+                var text = node.textContent;
+                var remainingLength = targetLength - currentLength;
+
+                if (text.length <= remainingLength) {
+                    result += text;
+                    currentLength += text.length;
+                } else {
+                    // Truncate at word boundary if possible
+                    var truncated = text.substring(0, remainingLength);
+                    if (mode === 'words') {
+                        var lastSpace = truncated.lastIndexOf(' ');
+                        if (lastSpace > remainingLength * 0.8) {
+                            truncated = truncated.substring(0, lastSpace);
+                        }
+                    }
+                    result += truncated;
+                    currentLength = targetLength; // Stop further processing
+                    return false;
+                }
+            } else if (node.nodeType === 1) { // ELEMENT_NODE
+                var tagName = node.tagName.toLowerCase();
+                var attributes = '';
+
+                // Copy attributes
+                for (var i = 0; i < node.attributes.length; i++) {
+                    var attr = node.attributes[i];
+                    attributes += ' ' + attr.name + '="' + attr.value + '"';
+                }
+
+                result += '<' + tagName + attributes + '>';
+
+                // Process children
+                for (var i = 0; i < node.childNodes.length; i++) {
+                    if (!walkNode(node.childNodes[i])) {
+                        break; // Stop if we've reached the limit
+                    }
+                }
+
+                result += '</' + tagName + '>';
+            }
+
+            return true;
+        }
+
+        // Process all child nodes
+        for (var i = 0; i < tempDiv.childNodes.length; i++) {
+            if (!walkNode(tempDiv.childNodes[i])) {
+                break;
+            }
+        }
+
+        return result;
+    }
+
     // First handle any existing show-more-btn elements (from view helper usage)
     const showMoreButtons = document.querySelectorAll(".show-more-btn");
 
@@ -40,8 +123,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 var localPart = term.split(':')[1];
                 // Handle camelCase to spaced words (e.g., accessRights -> access rights)
                 var spacedLabel = localPart.replace(/([A-Z])/g, ' $1').toLowerCase().trim();
-                return propertyLabel.toLowerCase() === spacedLabel ||
-                    propertyLabel.toLowerCase().includes(localPart.toLowerCase());            });
+                return propertyLabel.toLowerCase() === spacedLabel || propertyLabel.toLowerCase().includes(localPart.toLowerCase());
+            });
         }
 
         // Function to count words
@@ -85,6 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 var valueContent = nextElement.querySelector(".value-content");
                 if (valueContent) {
                     var originalText = valueContent.textContent.trim();
+                    var originalHTML = valueContent.innerHTML;
                     var needsTruncation = false;
 
                     if (showMoreMode === "words") {
@@ -98,9 +182,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (showMoreLimit === 0) {
                         needsTruncation = false;
                     }
+
                     if (needsTruncation) {
                         console.log("ShowMore: Applying truncation to", propertyLabel);
-                        var truncatedText = showMoreMode === "words" ? truncateByWords(originalText, showMoreLimit) : truncateByCharacters(originalText, showMoreLimit);
+
+                        // Create properly truncated HTML
+                        var truncatedHTML = truncateHTML(originalHTML, showMoreLimit, showMoreMode);
 
                         var uniqueId = "show-more-" + Math.random().toString(36).substr(2, 9);
                         var container = document.createElement("div");
@@ -109,7 +196,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                         var contentSpan = document.createElement("span");
                         contentSpan.className = "content-text";
-                        contentSpan.textContent = truncatedText;
+                        contentSpan.innerHTML = truncatedHTML; // Start with properly truncated HTML
 
                         var button = document.createElement("button");
                         button.type = "button";
@@ -118,22 +205,26 @@ document.addEventListener("DOMContentLoaded", function () {
                         button.setAttribute("data-hide-text", "Show less");
                         button.textContent = "Show more";
 
-                        container.setAttribute("data-full-content", originalText);
-                        container.setAttribute("data-truncated-content", truncatedText);
+                        // Store both versions
+                        container.setAttribute("data-full-html", originalHTML);
+                        container.setAttribute("data-truncated-html", truncatedHTML);
+                        button.addEventListener("click", (function (btnContainer, btnContentSpan, btnButton) {
+                            return function () {
+                                var isExpanded = btnContainer.classList.contains("expanded");
 
-                        button.addEventListener("click", function () {
-                            var isExpanded = container.classList.contains("expanded");
-
-                            if (isExpanded) {
-                                contentSpan.textContent = container.getAttribute("data-truncated-content");
-                                button.textContent = button.getAttribute("data-show-text");
-                                container.classList.remove("expanded");
-                            } else {
-                                contentSpan.textContent = container.getAttribute("data-full-content");
-                                button.textContent = button.getAttribute("data-hide-text");
-                                container.classList.add("expanded");
-                            }
-                        });
+                                if (isExpanded) {
+                                    // Collapse - show truncated HTML
+                                    btnContentSpan.innerHTML = btnContainer.getAttribute("data-truncated-html");
+                                    btnButton.textContent = btnButton.getAttribute("data-show-text");
+                                    btnContainer.classList.remove("expanded");
+                                } else {
+                                    // Expand - show full HTML
+                                    btnContentSpan.innerHTML = btnContainer.getAttribute("data-full-html");
+                                    btnButton.textContent = btnButton.getAttribute("data-hide-text");
+                                    btnContainer.classList.add("expanded");
+                                }
+                            };
+                        })(container, contentSpan, button));
 
                         container.appendChild(contentSpan);
                         container.appendChild(document.createTextNode(" "));
