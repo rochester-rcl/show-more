@@ -1,7 +1,3 @@
-/**
- * ShowMore Module CSS
- * Styles for show more/less functionality
- */
 
 .show-more-content {
     position: relative;
@@ -45,7 +41,6 @@
 .property .show-more-content {
     margin-bottom: 0.5em;
 }
-
 /* Property-specific styling */
 .property-dcterms-description .show-more-btn,
 .property-dcterms-abstract .show-more-btn {

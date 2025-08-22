@@ -8,39 +8,62 @@ $this->pageTitle($this->translate('Show More Settings'));
         $this->url('admin/site', [], true), ['class' => 'button']); ?>
 </div>
 
+<!-- Use a more robust approach -->
 <form method="post">
     <fieldset>
         <legend><?php echo $this->translate('Show More Configuration'); ?></legend>
 
+        <!-- Mode Selection -->
         <div class="field">
             <div class="field-meta">
-                <label for="show_more_mode"><?php echo $this->translate('Truncation Mode'); ?></label>
+                <label><?php echo $this->translate('Truncation Mode'); ?></label>
             </div>
             <div class="inputs">
                 <label>
                     <input type="radio" name="show_more_mode" value="words"
-                        <?php echo $settings['show_more_mode'] === 'words' ? 'checked' : ''; ?>>
+                        <?php echo ($settings['show_more_mode'] === 'words') ? 'checked' : ''; ?>>
                     <?php echo $this->translate('Words'); ?>
                 </label>
                 <label>
                     <input type="radio" name="show_more_mode" value="characters"
-                        <?php echo $settings['show_more_mode'] === 'characters' ? 'checked' : ''; ?>>
+                        <?php echo ($settings['show_more_mode'] === 'characters') ? 'checked' : ''; ?>>
                     <?php echo $this->translate('Characters'); ?>
                 </label>
             </div>
         </div>
 
+        <!-- Limit -->
         <div class="field">
             <div class="field-meta">
                 <label for="show_more_limit"><?php echo $this->translate('Limit'); ?></label>
-                <div class="field-description">
-                    <?php echo $this->translate('Number of words or characters before showing "Show more" button, select 0 to disable for this site.'); ?>
-                </div>
             </div>
             <div class="inputs">
                 <input type="number" name="show_more_limit" id="show_more_limit"
                        value="<?php echo $this->escapeHtml($settings['show_more_limit']); ?>"
                        min="0" max="10000" required>
+            </div>
+        </div>
+
+        <!-- Excluded Properties - Fix the name attribute -->
+        <div class="field">
+            <div class="field-meta">
+                <label for="show_more_excluded_properties"><?php echo $this->translate('Excluded Properties'); ?></label>
+                <div class="field-description">
+                    <?php echo $this->translate('Select properties to exclude from Show More functionality.'); ?>
+                </div>
+            </div>
+            <div class="inputs">
+                <select name="show_more_excluded_properties[]" id="show_more_excluded_properties"
+                        multiple="multiple" class="chosen-select"
+                        data-placeholder="<?php echo $this->escapeHtmlAttr($this->translate('Select properties to exclude…')); ?>">
+                    <?php foreach ($this->api()->search('properties')->getContent() as $property): ?>
+                        <option value="<?php echo $property->id(); ?>"
+                            <?php echo in_array($property->id(), $settings['show_more_excluded_properties']) ? 'selected' : ''; ?>>
+                            <?php echo $this->escapeHtml($this->translate($property->label())); ?>
+                            (<?php echo $this->escapeHtml($property->term()); ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
         </div>
     </fieldset>
@@ -49,3 +72,13 @@ $this->pageTitle($this->translate('Show More Settings'));
         <input type="submit" value="<?php echo $this->escapeHtml($this->translate('Save')); ?>" class="button">
     </div>
 </form>
+
+<script>
+    $(document).ready(function() {
+        // Initialize Chosen
+        $('#show_more_excluded_properties').chosen({
+            placeholder_text_multiple: "<?php echo $this->escapeJs($this->translate('Select properties to exclude…')); ?>",
+            width: "100%"
+        });
+    });
+</script>

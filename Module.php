@@ -50,20 +50,47 @@ class Module extends AbstractModule
     {
         // Check if site has Show More enabled (has settings configured)
         $showMoreMode = $view->siteSetting('show_more_mode');
-        $showMoreLimit = $view->siteSetting('show_more_limit', 50);
+        $showMoreLimit = $view->siteSetting('show_more_limit', 0);
+
+        // Get excluded property IDs and convert to terms
+        $excludedPropertyIds = $view->siteSetting('show_more_excluded_properties', []);
+        $excludedPropertyTerms = $this->getPropertyTerms($view, $excludedPropertyIds);
 
         // Only inject assets if show more is configured for this site
         if ($showMoreMode) {
             $view->headStyle()->appendStyle($this->getShowMoreCss());
 
-            // Inject JavaScript with configuration embedded
+            // Inject JavaScript with configuration including excluded property terms
             $jsWithConfig = str_replace(
-                ['__SHOW_MORE_MODE__', '__SHOW_MORE_LIMIT__'],
-                [$view->escapeJs($showMoreMode), (int) $showMoreLimit],
+                ['__SHOW_MORE_MODE__', '__SHOW_MORE_LIMIT__', '__EXCLUDED_PROPERTIES__'],
+                [
+                    $view->escapeJs($showMoreMode),
+                    (int) $showMoreLimit,
+                    json_encode($excludedPropertyTerms)
+                ],
                 $this->getShowMoreJs()
             );
             $view->headScript()->appendScript($jsWithConfig);
         }
+    }
+
+    protected function getPropertyTerms($view, $propertyIds)
+    {
+        if (empty($propertyIds)) {
+            return [];
+        }
+
+        $terms = [];
+        try {
+            $properties = $view->api()->search('properties', ['id' => $propertyIds])->getContent();
+            foreach ($properties as $property) {
+                $terms[] = $property->term();
+            }
+        } catch (\Exception $e) {
+            // Fail silently - just return empty array
+        }
+
+        return $terms;
     }
 
     /**
@@ -71,66 +98,7 @@ class Module extends AbstractModule
      */
     protected function getShowMoreCss()
     {
-        return '
-.show-more-content {
-    position: relative;
-}
-
-.show-more-btn {
-    background: none;
-    border: none;
-    color: #0073aa;
-    cursor: pointer;
-    text-decoration: underline;
-    padding: 0;
-    margin-left: 5px;
-    font-size: inherit;
-    font-family: inherit;
-    display: inline;
-}
-
-.show-more-btn:hover {
-    color: #005a87;
-}
-
-.show-more-btn:focus {
-    outline: 1px dotted #0073aa;
-    outline-offset: 2px;
-}
-
-.show-more-content .content-text {
-    display: inline;
-}
-
-.show-more-content.expanded .content-text {
-    display: inline;
-}
-
-/* Specific styling for metadata properties */
-.show-more-metadata {
-    line-height: 1.5;
-}
-
-.property .show-more-content {
-    margin-bottom: 0.5em;
-}
-
-/* Property-specific styling */
-.property-dcterms-description .show-more-btn,
-.property-dcterms-abstract .show-more-btn {
-    font-weight: normal;
-    font-style: italic;
-}
-
-/* Ensure proper spacing in metadata context */
-.metadata .property .value .show-more-content {
-    display: block;
-}
-
-.metadata .property .value .show-more-content .content-text {
-    display: inline;
-}
-';
+        return file_get_contents(__DIR__ . '/asset/css/show-more.css');
     }
 
     /**
@@ -138,7 +106,6 @@ class Module extends AbstractModule
      */
     protected function getShowMoreJs()
     {
-        $js_content = file_get_contents('./modules/ShowMore/asset/js/show-more.js');
-        return $js_content;
+        return file_get_contents(__DIR__ . '/asset/js/show-more.js');
     }
 }
