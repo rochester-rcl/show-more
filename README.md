@@ -1,5 +1,5 @@
 # Show More - An Omkea S Module
-
+## Overview
 This module adds customizable folding functionality to long metadata fields in Omeka S.
 
 Normally when Omeka S displays a metadata field, the entire contents is displayed. This simple module allows for fields to be truncated, with a show more link/show less link to unfold the remaining content. The length of content to show before truncating is customizable on a site by site basis. This can be disabled per site by selecting "0" as the truncation length
