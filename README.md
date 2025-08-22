@@ -14,6 +14,7 @@ Unzip a release of this module in your modules folder. Ensure the folder is name
 ## TODO
 - [x] Add an "Excluded Properties" dropdown to exclude certain properties from folding.
 - [ ] Implement Optional folding of Media entries and item set lists for items
+- [ ] Implement folding of multi-entry items as selectable "As block" vs "Per Entry" (currently is always per entry)
 
 ## Known bugs
 - Links and html content (if using data type RDF) are not handled properly in 1.2, leading to HTML being stripped entirely from any folding field, though not from fields too short to truncate. This has been fixed in the latest version of the master branch, but has not yet been rolled into a release as I continue to search for bugs.
