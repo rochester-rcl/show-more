@@ -15,6 +15,7 @@ Unzip a release of this module in your modules folder. Ensure the folder is name
 - [x] Add an "Excluded Properties" dropdown to exclude certain properties from folding.
 - [ ] Implement Optional folding of Media entries and item set lists for items
 - [ ] Implement folding of multi-entry items as selectable "As block" vs "Per Entry" (currently is always per entry)
+- [ ] Add the ability to change the name of the "Show More" "Show Less" labels
 
 ## Known bugs
 - Currently truncates Right to Left languages as if they are left to right
