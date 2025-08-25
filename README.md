@@ -17,8 +17,8 @@ Unzip a release of this module in your modules folder. Ensure the folder is name
 - [ ] Implement folding of multi-entry items as selectable "As block" vs "Per Entry" (currently is always per entry)
 
 ## Known bugs
-- Links and html content (if using data type RDF) are not handled properly in 1.2, leading to HTML being stripped entirely from any folding field, though not from fields too short to truncate. This has been fixed in the latest version of the master branch, but has not yet been rolled into a release as I continue to search for bugs.
-
+- Currently truncates Right to Left languages as if they are left to right
+  
 ## Support
 This module is supported through Github. Should you encounter a bug, or to request an enhancement, please open an issue on this repository. I will address them as I am able.
 
