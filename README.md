@@ -18,7 +18,7 @@ Unzip a release of this module in your modules folder. Ensure the folder is name
 - [ ] Add the ability to change the name of the "Show More" "Show Less" labels
 
 ## Known bugs
-- Currently truncates Right to Left languages as if they are left to right
+- None currently
   
 ## Support
 This module is supported through Github. Should you encounter a bug, or to request an enhancement, please open an issue on this repository. I will address them as I am able.
