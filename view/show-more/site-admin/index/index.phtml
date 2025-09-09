@@ -21,7 +21,11 @@ $this->pageTitle($this->translate('Show More Settings'));
             <div class="inputs">
                 <label>
                     <input type="radio" name="show_more_mode" value="words"
-                        <?php echo ($settings['show_more_mode'] === 'words') ? 'checked' : ''; ?>>
+                        <?php if (!isset($settings
+                        )){$settings = array(
+
+                        );}
+                        echo ($settings['show_more_mode'] === 'words') ? 'checked' : ''; ?>>
                     <?php echo $this->translate('Words'); ?>
                 </label>
                 <label>
@@ -44,7 +48,7 @@ $this->pageTitle($this->translate('Show More Settings'));
             </div>
         </div>
 
-        <!-- Excluded Properties - Fix the name attribute -->
+        <!-- Excluded Properties -->
         <div class="field">
             <div class="field-meta">
                 <label for="show_more_excluded_properties"><?php echo $this->translate('Excluded Properties'); ?></label>
@@ -64,6 +68,23 @@ $this->pageTitle($this->translate('Show More Settings'));
                         </option>
                     <?php endforeach; ?>
                 </select>
+            </div>
+        </div>
+
+        <!-- Expand All/Collapse All Button -->
+        <div class="field">
+            <div class="field-meta">
+                <label for="show_more_expand_all_enabled"><?php echo $this->translate('Expand All/Collapse All Button'); ?></label>
+                <div class="field-description">
+                    <?php echo $this->translate('When enabled, an "Expand all/Collapse all" button will appear on pages with folded content.'); ?>
+                </div>
+            </div>
+            <div class="inputs">
+                <label>
+                    <input type="checkbox" name="show_more_expand_all_enabled" id="show_more_expand_all_enabled" value="1"
+                        <?php echo $settings['show_more_expand_all_enabled'] ? 'checked' : ''; ?>>
+                    <?php echo $this->translate('Enable Expand All/Collapse All Button'); ?>
+                </label>
             </div>
         </div>
     </fieldset>

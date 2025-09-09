@@ -6,13 +6,14 @@ Normally when Omeka S displays a metadata field, the entire contents is displaye
 
 ## Customization
 
-The styling of the "Show more" button can be adusted by altering the CSS file at /ShowMore/assets/css/show-more.css
+The styling of the "Show more" button can be adjusted by altering the CSS file at /ShowMore/assets/css/show-more.css
 
 ## Installation
 Unzip a release of this module in your modules folder. Ensure the folder is named "ShowMore". Go into the Omeka S admin interface and hit install. From there, you will have to configure folding on each site that you want it enabled on.
 
 ## TODO
 - [x] Add an "Excluded Properties" dropdown to exclude certain properties from folding.
+- [x] Add Expand all/ Collapse all functionality.
 - [ ] Implement Optional folding of Media entries and item set lists for items
 - [ ] Implement folding of multi-entry items as selectable "As block" vs "Per Entry" (currently is always per entry)
 - [ ] Add the ability to change the name of the "Show More" "Show Less" labels

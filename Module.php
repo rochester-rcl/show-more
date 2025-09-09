@@ -51,6 +51,7 @@ class Module extends AbstractModule
         // Check if site has Show More enabled (has settings configured)
         $showMoreMode = $view->siteSetting('show_more_mode');
         $showMoreLimit = $view->siteSetting('show_more_limit', 0);
+        $expandAllEnabled = $view->siteSetting('show_more_expand_all_enabled', true);
 
         // Get excluded property IDs and convert to terms
         $excludedPropertyIds = $view->siteSetting('show_more_excluded_properties', []);
@@ -60,13 +61,14 @@ class Module extends AbstractModule
         if ($showMoreMode) {
             $view->headStyle()->appendStyle($this->getShowMoreCss());
 
-            // Inject JavaScript with configuration including excluded property terms
+            // Inject JavaScript with configuration including excluded property terms and expand all setting
             $jsWithConfig = str_replace(
-                ['__SHOW_MORE_MODE__', '__SHOW_MORE_LIMIT__', '__EXCLUDED_PROPERTIES__'],
+                ['__SHOW_MORE_MODE__', '__SHOW_MORE_LIMIT__', '__EXCLUDED_PROPERTIES__', '__EXPAND_ALL_ENABLED__'],
                 [
                     $view->escapeJs($showMoreMode),
                     (int) $showMoreLimit,
-                    json_encode($excludedPropertyTerms)
+                    json_encode($excludedPropertyTerms),
+                    $expandAllEnabled ? 'true' : 'false'
                 ],
                 $this->getShowMoreJs()
             );

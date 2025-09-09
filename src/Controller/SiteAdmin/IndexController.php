@@ -22,6 +22,10 @@ class IndexController extends AbstractActionController
             $siteSettings->set('show_more_mode', $data['show_more_mode'] ?? 'words');
             $siteSettings->set('show_more_limit', (int)($data['show_more_limit'] ?? 0));
 
+            // Save expand all setting (defaults to enabled)
+            $expandAllEnabled = isset($data['show_more_expand_all_enabled']) ? (bool)$data['show_more_expand_all_enabled'] : false;
+            $siteSettings->set('show_more_expand_all_enabled', $expandAllEnabled);
+
             // Handle excluded properties - the key difference here!
             // The propertySelect helper may send data in a nested array format
             $excludedProperties = [];
@@ -54,6 +58,7 @@ class IndexController extends AbstractActionController
             $excludedProperties = array_unique(array_filter($excludedProperties));
 
             error_log('Processed excluded properties: ' . print_r($excludedProperties, true));
+            error_log('Expand all enabled: ' . ($expandAllEnabled ? 'true' : 'false'));
 
             // Save to site settings
             $siteSettings->set('show_more_excluded_properties', $excludedProperties);
@@ -68,6 +73,7 @@ class IndexController extends AbstractActionController
 
         // GET request - load current settings
         $excludedPropertyIds = $siteSettings->get('show_more_excluded_properties', []);
+        $expandAllEnabled = $siteSettings->get('show_more_expand_all_enabled', true); // Default to enabled
 
         // Ensure we have proper format for the view
         if (!is_array($excludedPropertyIds)) {
@@ -76,12 +82,14 @@ class IndexController extends AbstractActionController
 
         error_log('=== ShowMore GET request ===');
         error_log('Excluded property IDs loaded: ' . print_r($excludedPropertyIds, true));
+        error_log('Expand all enabled: ' . ($expandAllEnabled ? 'true' : 'false'));
 
         // Prepare settings for the view
         $settings = [
             'show_more_mode' => $siteSettings->get('show_more_mode', 'words'),
             'show_more_limit' => $siteSettings->get('show_more_limit', 0),
             'show_more_excluded_properties' => $excludedPropertyIds,
+            'show_more_expand_all_enabled' => $expandAllEnabled,
         ];
 
         return new ViewModel([

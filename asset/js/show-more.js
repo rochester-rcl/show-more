@@ -1,6 +1,11 @@
 document.addEventListener("DOMContentLoaded", function () {
     console.log("ShowMore: DOM loaded, starting processing");
 
+    // Global variables for expand all functionality
+    let expandAllButton = null;
+    let expandAllContainer = null;
+    let showMoreContainers = [];
+
     function truncateHTML(html, maxLength, mode) {
         var tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
@@ -84,6 +89,63 @@ document.addEventListener("DOMContentLoaded", function () {
         return result;
     }
 
+    // Function to create expand all/collapse all button
+    function createExpandAllButton() {
+        expandAllContainer = document.createElement('div');
+        expandAllContainer.className = 'show-more-expand-all-container hidden';
+
+        // Override the fixed positioning with inline styles
+        expandAllContainer.style.position = 'static';
+        expandAllContainer.style.background = 'transparent';
+        expandAllContainer.style.border = 'none';
+        expandAllContainer.style.boxShadow = 'none';
+        expandAllContainer.style.marginBottom = '20px';
+        expandAllContainer.style.padding = '8px 0';
+
+        expandAllButton = document.createElement('button');
+        expandAllButton.type = 'button';
+        expandAllButton.className = 'show-more-expand-all-btn';
+        expandAllButton.textContent = 'Expand all';
+
+        expandAllButton.addEventListener('click', function() {
+            const isExpandingAll = expandAllButton.textContent === 'Expand all';
+
+            showMoreContainers.forEach(function(container) {
+                const button = container.querySelector('.show-more-btn');
+                const contentSpan = container.querySelector('.content-text');
+                const isCurrentlyExpanded = container.classList.contains('expanded');
+
+                if (isExpandingAll && !isCurrentlyExpanded) {
+                    // Expand this item
+                    contentSpan.innerHTML = container.getAttribute('data-full-html');
+                    button.textContent = button.getAttribute('data-hide-text');
+                    container.classList.add('expanded');
+                } else if (!isExpandingAll && isCurrentlyExpanded) {
+                    // Collapse this item
+                    contentSpan.innerHTML = container.getAttribute('data-truncated-html');
+                    button.textContent = button.getAttribute('data-show-text');
+                    container.classList.remove('expanded');
+                }
+            });
+
+            // Update button text
+            expandAllButton.textContent = isExpandingAll ? 'Collapse all' : 'Expand all';
+        });
+
+        expandAllContainer.appendChild(expandAllButton);
+
+        // Insert after the "Item" heading but before the metadata dl
+        const itemHeading = document.querySelector('h3');
+        const metadataSection = document.querySelector('dl');
+        if (itemHeading && metadataSection) {
+            itemHeading.parentNode.insertBefore(expandAllContainer, metadataSection);
+        } else if (metadataSection) {
+            metadataSection.parentNode.insertBefore(expandAllContainer, metadataSection);
+        } else {
+            document.body.appendChild(expandAllContainer);
+        }
+    }
+
     // First handle any existing show-more-btn elements (from view helper usage)
     const showMoreButtons = document.querySelectorAll(".show-more-btn");
 
@@ -115,11 +177,17 @@ document.addEventListener("DOMContentLoaded", function () {
         var showMoreMode = "__SHOW_MORE_MODE__";
         var showMoreLimit = __SHOW_MORE_LIMIT__;
         var excludedProperties = __EXCLUDED_PROPERTIES__;
+        var expandAllEnabled = __EXPAND_ALL_ENABLED__;
         console.log("ShowMore: Mode:", showMoreMode, "Limit:", showMoreLimit);
+
+        // Create expand all button if enabled
+        if (expandAllEnabled) {
+            createExpandAllButton();
+        }
 
         function isPropertyExcluded(propertyLabel) {
             return excludedProperties.some(function (term) {
-// Extract the local part of the term and compare with label
+                // Extract the local part of the term and compare with label
                 var localPart = term.split(':')[1];
                 // Handle camelCase to spaced words (e.g., accessRights -> access rights)
                 var spacedLabel = localPart.replace(/([A-Z])/g, ' $1').toLowerCase().trim();
@@ -208,6 +276,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         // Store both versions
                         container.setAttribute("data-full-html", originalHTML);
                         container.setAttribute("data-truncated-html", truncatedHTML);
+
+                        // Add to tracking array for expand all functionality
+                        showMoreContainers.push(container);
+
                         button.addEventListener("click", (function (btnContainer, btnContentSpan, btnButton) {
                             return function () {
                                 var isExpanded = btnContainer.classList.contains("expanded");
@@ -240,5 +312,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 nextElement = nextElement.nextElementSibling;
             }
         });
+
+        // Show expand all button if we have containers and it's enabled
+        if (expandAllEnabled && showMoreContainers.length > 0) {
+            expandAllContainer.classList.remove('hidden');
+            console.log("ShowMore: Expand all button shown with", showMoreContainers.length, "containers");
+        }
     }
 });
