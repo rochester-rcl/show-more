@@ -45,6 +45,17 @@ class SiteSettingsForm extends Form
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select properties to exclude…',
                 ],
+            ])
+            ->add([
+                'name' => 'show_more_expand_all_enabled',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Enable Expand All/Collapse All Button',
+                    'info' => 'When enabled, an "Expand all/Collapse all" button will appear on pages with folded content.',
+                ],
+                'attributes' => [
+                    'value' => '1',
+                ],
             ]);
     }
 }
