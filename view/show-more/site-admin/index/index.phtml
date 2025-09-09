@@ -23,7 +23,6 @@ $this->pageTitle($this->translate('Show More Settings'));
                     <input type="radio" name="show_more_mode" value="words"
                         <?php if (!isset($settings
                         )){$settings = array(
-
                         );}
                         echo ($settings['show_more_mode'] === 'words') ? 'checked' : ''; ?>>
                     <?php echo $this->translate('Words'); ?>
