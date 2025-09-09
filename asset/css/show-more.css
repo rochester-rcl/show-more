@@ -100,14 +100,14 @@
     display: none;
 }
 
-@media query screen and (max-width: 750px) {
+@media screen and (max-width: 750px) {
     .show-more-expand-all-container {
         width: 20%;
     }
 }
 
 
-@media query screen and (max-width: 550px) {
+@media screen and (max-width: 550px) {
     .show-more-expand-all-container {
         width: 25%;
     }
