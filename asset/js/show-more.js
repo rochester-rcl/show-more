@@ -6,14 +6,28 @@ document.addEventListener("DOMContentLoaded", function () {
     let expandAllContainer = null;
     let showMoreContainers = [];
 
+    // Function to count words
+    function countWords(text) {
+        return text.trim().split(/\s+/).filter(function (word) {
+            return word.length > 0;
+        }).length;
+    }
+
     function truncateHTML(html, maxLength, mode) {
         var tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
         var fullText = tempDiv.textContent || tempDiv.innerText;
 
+        console.log("=== truncateHTML START ===");
+        console.log("Input html:", html);
+        console.log("maxLength:", maxLength, "mode:", mode);
+
         // If content is already short enough, return as-is
-        var actualLength = mode === 'words' ? countWords(fullText) : fullText.length;
+        var actualLength = mode === 'words' ? countWords(fullText) : Array.from(fullText).length;
+        console.log("actualLength:", actualLength);
+
         if (actualLength <= maxLength) {
+            console.log("Returning original - no truncation needed");
             return html;
         }
 
@@ -24,6 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             targetLength = maxLength;
         }
+        console.log("targetLength:", targetLength);
 
         // Walk through the DOM and build truncated HTML
         var result = '';
@@ -31,30 +46,39 @@ document.addEventListener("DOMContentLoaded", function () {
 
         function walkNode(node) {
             if (currentLength >= targetLength) {
-                return false; // Stop processing
+                console.log("Stopping - reached target");
+                return false;
             }
 
             if (node.nodeType === 3) { // TEXT_NODE
                 var text = node.textContent;
+                var textArray = Array.from(text);
                 var remainingLength = targetLength - currentLength;
 
-                if (text.length <= remainingLength) {
+                console.log("TEXT_NODE:", text);
+                console.log("  textArray.length:", textArray.length, "remainingLength:", remainingLength);
+
+                if (textArray.length <= remainingLength) {
+                    currentLength += textArray.length;
                     result += text;
-                    currentLength += text.length;
+                    console.log("  Added full text, currentLength now:", currentLength);
                 } else {
-                    // Truncate at word boundary if possible
-                    var truncated = text.substring(0, remainingLength);
+                    var truncated = textArray.slice(0, remainingLength);
+                    console.log("  Truncating to", remainingLength, "chars");
                     if (mode === 'words') {
-                        var lastSpace = truncated.lastIndexOf(' ');
+                        var truncatedStr = truncated.join("");
+                        var lastSpace = truncatedStr.lastIndexOf(' ');
                         if (lastSpace > remainingLength * 0.8) {
-                            truncated = truncated.substring(0, lastSpace);
+                            truncated = truncated.slice(0, lastSpace);
+                            console.log("  Adjusted to word boundary at", lastSpace);
                         }
                     }
-                    result += truncated;
-                    currentLength = targetLength; // Stop further processing
+                    result += truncated.join("");
+                    currentLength = targetLength;
+                    console.log("  Added truncated text, currentLength now:", currentLength);
                     return false;
                 }
-            } else if (node.nodeType === 1) { // ELEMENT_NODE
+            } else if (node.nodeType === 1) {  // ELEMENT_NODE
                 var tagName = node.tagName.toLowerCase();
                 var attributes = '';
 
@@ -75,7 +99,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 result += '</' + tagName + '>';
             }
-
+            console.log("Final result:", result);
+            console.log("Result length (Array.from):", Array.from(result).length);
             return true;
         }
 
@@ -107,10 +132,10 @@ document.addEventListener("DOMContentLoaded", function () {
         expandAllButton.className = 'show-more-expand-all-btn';
         expandAllButton.textContent = 'Expand all';
 
-        expandAllButton.addEventListener('click', function() {
+        expandAllButton.addEventListener('click', function () {
             const isExpandingAll = expandAllButton.textContent === 'Expand all';
 
-            showMoreContainers.forEach(function(container) {
+            showMoreContainers.forEach(function (container) {
                 const button = container.querySelector('.show-more-btn');
                 const contentSpan = container.querySelector('.content-text');
                 const isCurrentlyExpanded = container.classList.contains('expanded');
@@ -134,15 +159,56 @@ document.addEventListener("DOMContentLoaded", function () {
 
         expandAllContainer.appendChild(expandAllButton);
 
-        // Insert after the "Item" heading but before the metadata dl
+        // FIXED: More robust DOM insertion strategy
+        // Try multiple insertion points with proper error handling
+        let inserted = false;
+
+        // Try 1: After item heading, before metadata dl
         const itemHeading = document.querySelector('h3');
         const metadataSection = document.querySelector('dl');
-        if (itemHeading && metadataSection) {
-            itemHeading.parentNode.insertBefore(expandAllContainer, metadataSection);
-        } else if (metadataSection) {
-            metadataSection.parentNode.insertBefore(expandAllContainer, metadataSection);
-        } else {
-            document.body.appendChild(expandAllContainer);
+
+        if (itemHeading && metadataSection && itemHeading.parentNode === metadataSection.parentNode) {
+            try {
+                itemHeading.parentNode.insertBefore(expandAllContainer, metadataSection);
+                inserted = true;
+            } catch (e) {
+                console.log("ShowMore: Method 1 failed, trying alternative");
+            }
+        }
+
+        // Try 2: After heading if same parent check failed
+        if (!inserted && itemHeading) {
+            try {
+                if (itemHeading.nextSibling) {
+                    itemHeading.parentNode.insertBefore(expandAllContainer, itemHeading.nextSibling);
+                } else {
+                    itemHeading.parentNode.appendChild(expandAllContainer);
+                }
+                inserted = true;
+            } catch (e) {
+                console.log("ShowMore: Method 2 failed, trying alternative");
+            }
+        }
+
+        // Try 3: Before metadata section
+        if (!inserted && metadataSection) {
+            try {
+                metadataSection.parentNode.insertBefore(expandAllContainer, metadataSection);
+                inserted = true;
+            } catch (e) {
+                console.log("ShowMore: Method 3 failed, trying alternative");
+            }
+        }
+
+        // Try 4: Fallback - append to body
+        if (!inserted) {
+            try {
+                document.body.appendChild(expandAllContainer);
+                inserted = true;
+                console.log("ShowMore: Used fallback insertion method");
+            } catch (e) {
+                console.error("ShowMore: All insertion methods failed", e);
+            }
         }
     }
 
@@ -195,31 +261,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
-        // Function to count words
-        function countWords(text) {
-            return text.trim().split(/\s+/).filter(function (word) {
-                return word.length > 0;
-            }).length;
-        }
-
-        // Function to truncate by words
-        function truncateByWords(text, limit) {
-            var words = text.trim().split(/\s+/);
-            if (words.length <= limit) return text;
-            return words.slice(0, limit).join(" ") + "...";
-        }
-
-        // Function to truncate by characters
-        function truncateByCharacters(text, limit) {
-            if (text.length <= limit) return text;
-            var truncated = text.substring(0, limit);
-            var lastSpace = truncated.lastIndexOf(" ");
-            if (lastSpace > limit * 0.8) {
-                truncated = truncated.substring(0, lastSpace);
-            }
-            return truncated.replace(/[.,;:!?]\s*$/, "") + "...";
-        }
-
         // Process each property
         var dtElements = document.querySelectorAll("dt");
 
@@ -230,7 +271,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             console.log("ShowMore: Found", propertyLabel, "property");
             var nextElement = dt.nextElementSibling;
-
 
             while (nextElement && nextElement.tagName === "DD") {
                 var valueContent = nextElement.querySelector(".value-content");
@@ -244,7 +284,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         needsTruncation = wordCount > showMoreLimit;
                         console.log("ShowMore: Word count:", wordCount, "Needs truncation:", needsTruncation);
                     } else {
-                        needsTruncation = originalText.length > showMoreLimit;
+                        needsTruncation = Array.from(originalText).length > showMoreLimit;
                         console.log("ShowMore: Character count:", originalText.length, "Needs truncation:", needsTruncation);
                     }
                     if (showMoreLimit === 0) {
@@ -256,7 +296,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
                         // Create properly truncated HTML
                         var truncatedHTML = truncateHTML(originalHTML, showMoreLimit, showMoreMode);
-
+                        console.log("Truncated HTML returned:", truncatedHTML);
+                        console.log("Truncated HTML length:", Array.from(truncatedHTML).length);
                         var uniqueId = "show-more-" + Math.random().toString(36).substr(2, 9);
                         var container = document.createElement("div");
                         container.className = "show-more-content show-more-metadata";
@@ -276,6 +317,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         // Store both versions
                         container.setAttribute("data-full-html", originalHTML);
                         container.setAttribute("data-truncated-html", truncatedHTML);
+                        console.log("data-full-html:", container.getAttribute("data-full-html"));
+                        console.log("data-truncated-html:", container.getAttribute("data-truncated-html"));
 
                         // Add to tracking array for expand all functionality
                         showMoreContainers.push(container);
